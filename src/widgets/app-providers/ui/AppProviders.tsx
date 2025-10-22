@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient, restoreQueryClient, persistQueryClient } from '~/shared/api';
 import { AuthProvider } from '~/features/auth';
 import { ThemeProvider } from '~/entities/theme';
+import { GeolocationProvider } from '~/entities/geolocation';
 import { ErrorBoundary } from '~/shared/ui';
 import { useAppState } from '~/shared/lib/hooks';
 
@@ -46,9 +47,11 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <AppStateHandler>
-              {children}
-            </AppStateHandler>
+            <GeolocationProvider>
+              <AppStateHandler>
+                {children}
+              </AppStateHandler>
+            </GeolocationProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

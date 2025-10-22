@@ -12,22 +12,19 @@ import {
 import { observer } from 'mobx-react-lite';
 import { useNavigation } from '@react-navigation/native';
 import { useShifts, Shift } from '~/entities/shift';
+import { useGeolocation } from '~/entities/geolocation';
 import { useTheme } from '~/entities/theme';
 
 const ShiftListPage = observer(() => {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { location, isLoading: isLocationLoading, error: locationError, hasPermission, retry: retryLocation } = useGeolocation();
   const {
     shifts,
     isLoading,
-    isLocationLoading,
     error,
-    locationError,
     hasShifts,
-    shouldShowLocationPrompt,
-    userLocation,
     loadShifts,
-    requestLocation,
     selectShift,
   } = useShifts();
 
@@ -36,20 +33,30 @@ const ShiftListPage = observer(() => {
     navigation.navigate('ShiftDetails' as never);
   }, [selectShift, navigation]);
 
+  // Auto-load shifts when location becomes available
+  React.useEffect(() => {
+    if (location && hasPermission) {
+      loadShifts({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    }
+  }, [location, hasPermission, loadShifts]);
+
   const handleRefresh = useCallback(async () => {
-    if (userLocation) {
+    if (location) {
       await loadShifts({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
+        latitude: location.latitude,
+        longitude: location.longitude,
       });
     } else {
-      await requestLocation();
+      await retryLocation();
     }
-  }, [userLocation, loadShifts, requestLocation]);
+  }, [location, loadShifts, retryLocation]);
 
   const handleRetryLocation = useCallback(() => {
-    requestLocation();
-  }, [requestLocation]);
+    retryLocation();
+  }, [retryLocation]);
 
   const renderShiftItem = useCallback(({ item }: { item: Shift }) => (
     <ShiftCard
@@ -119,15 +126,15 @@ const ShiftListPage = observer(() => {
       );
     }
 
-    if (shouldShowLocationPrompt) {
+    if (!hasPermission && !isLocationLoading) {
       return (
         <View style={styles.centerContainer}>
           <Text style={[styles.promptText, { color: colors.text }]}>
-            To find work shifts near you, we need access to your location.
+            Location access is required to find work shifts near you.
           </Text>
           <TouchableOpacity
             style={[styles.locationButton, { backgroundColor: colors.primary }]}
-            onPress={requestLocation}
+            onPress={handleRetryLocation}
           >
             <Text style={[styles.locationButtonText, { color: colors.background }]}>
               Enable Location
@@ -156,12 +163,11 @@ const ShiftListPage = observer(() => {
     isLocationLoading,
     locationError,
     error,
-    shouldShowLocationPrompt,
+    hasPermission,
     hasShifts,
     colors,
     handleRetryLocation,
     handleRefresh,
-    requestLocation,
   ]);
 
   return (
