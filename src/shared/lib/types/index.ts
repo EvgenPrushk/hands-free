@@ -51,6 +51,8 @@ export type RootStackParamList = {
   Details: { itemId: number };
   Profile: undefined;
   Settings: undefined;
+  ShiftList: undefined;
+  ShiftDetails: undefined;
 };
 
 // Error types

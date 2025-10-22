@@ -7,6 +7,7 @@ import { RootStackParamList } from '~/shared/lib/types';
 // Import pages
 import { HomePage } from '~/pages/home';
 import { DetailsPage } from '~/pages/details';
+import { ShiftListPage, ShiftDetailsPage } from '~/pages/shifts';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -16,7 +17,7 @@ export const Navigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="ShiftList"
         screenOptions={{
           headerStyle: {
             backgroundColor: colors.surface,
@@ -39,6 +40,20 @@ export const Navigation = () => {
           component={DetailsPage}
           options={{
             title: 'Item Details',
+          }}
+        />
+        <Stack.Screen
+          name="ShiftList"
+          component={ShiftListPage}
+          options={{
+            title: 'Available Shifts',
+          }}
+        />
+        <Stack.Screen
+          name="ShiftDetails"
+          component={ShiftDetailsPage}
+          options={{
+            title: 'Shift Details',
           }}
         />
       </Stack.Navigator>
